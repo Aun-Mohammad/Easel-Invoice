@@ -14,8 +14,8 @@ const EaselInvoiceMaker = dynamic(() => import('@/components/EaselInvoiceMaker')
       minHeight="100vh"
       flexDirection="column"
     >
-      <Typography variant="h6" sx={{ mb: 2, color: '#366932' }}>
-        Loading Easel Invoice Maker...
+      <Typography variant="h6" sx={{ mb: 2, color: '#751624' }}>
+        Loading Red Knot Invoice Maker...
       </Typography>
     </Box>
   ),

@@ -78,9 +78,6 @@ const LogoContainer = styled(Box)(({ theme }) => ({
     maxHeight: '180px',
     height: 'auto',
     objectFit: 'contain',
-    [theme.breakpoints.down('sm')]: {
-      maxHeight: '100px',
-    },
   },
 }));
 
@@ -170,7 +167,8 @@ const StyledTextFieldHeading = styled(TextField)(({ theme }) => ({
     },
   },
   '& .MuiInputBase-input': {
-    color: 'black',
+    color: 'white',
+    WebkitTextFillColor: 'white',
   },
 }));
 
