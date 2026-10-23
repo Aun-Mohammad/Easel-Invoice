@@ -24,6 +24,7 @@ import autoTable from 'jspdf-autotable';
 import { toWords } from 'number-to-words';
 import { InvoiceConstants, formatText } from '@/lib/invoiceConstants';
 import Image from 'next/image';
+import redKnotImage from '../../public/red-knot.png';
 
 // Styled components
 const MainContainer = styled(Container)(({ theme }) => ({
@@ -71,8 +72,12 @@ const HeaderSection = styled(Box)(({ theme }) => ({
 
 const LogoContainer = styled(Box)(({ theme }) => ({
   '& img': {
+    display: 'block',
+    width: 'auto',
+    maxWidth: '200px',
     maxHeight: '180px',
-    width: '200px',
+    height: 'auto',
+    objectFit: 'contain',
     [theme.breakpoints.down('sm')]: {
       maxHeight: '100px',
     },
@@ -82,7 +87,6 @@ const LogoContainer = styled(Box)(({ theme }) => ({
 const ConstantsContainer = styled(Box)(({ theme }) => ({
   textAlign: 'right',
   fontSize: '12px',
-  paddingTop: theme.spacing(2),
   [theme.breakpoints.down('sm')]: {
     textAlign: 'center',
   },
@@ -113,9 +117,9 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 const StyledTableHead = styled(TableHead)(({ theme }) => ({
-  borderBottom: '2px solid #64a34f',
+  borderBottom: '2px solid #751624',
   color: 'white',
-  backgroundColor: '#64a34f',
+  backgroundColor: '#751624',
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -123,20 +127,20 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     color: 'black',
   },
   '& label.Mui-focused': {
-    color: '#64a34f',
+    color: '#751624',
   },
   '& .MuiInput-underline:after': {
-    borderBottomColor: '#64a34f',
+    borderBottomColor: '#751624',
   },
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
-      borderColor: '#64a34f',
+      borderColor: '#751624',
     },
     '&:hover fieldset': {
       borderColor: '#366932',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#64a34f',
+      borderColor: '#751624',
     },
   },
   '& .MuiInputBase-input': {
@@ -149,10 +153,10 @@ const StyledTextFieldHeading = styled(TextField)(({ theme }) => ({
     color: 'black',
   },
   '& label.Mui-focused': {
-    color: '#64a34f',
+    color: '#751624',
   },
   '& .MuiInput-underline:after': {
-    borderBottomColor: '#64a34f',
+    borderBottomColor: '#751624',
   },
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
@@ -173,7 +177,7 @@ const StyledTextFieldHeading = styled(TextField)(({ theme }) => ({
 const ActionButton = styled(IconButton)(({ theme, variant }) => ({
   padding: 0,
   backgroundColor: 'white',
-  color: variant === 'delete' ? '#f41c6c' : '#64a34f',
+  color: variant === 'delete' ? '#f41c6c' : '#751624',
   '&:hover': {
     color: 'white',
     backgroundColor: variant === 'delete' ? 'rgba(244, 28, 108,0.2)' : '#d1be04',
@@ -202,13 +206,13 @@ const NotesContainer = styled(Box)(({ theme }) => ({
 
 const GenerateButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(5),
-  backgroundColor: '#366932',
+  backgroundColor: '#751624',
   color: 'white',
   padding: theme.spacing(1.5, 3),
   borderRadius: '8px',
   '&:hover': {
     color: 'white',
-    backgroundColor: '#64a34f',
+    backgroundColor: '#751624',
   },
 }));
 
@@ -343,24 +347,36 @@ const EaselInvoiceMaker = () => {
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
     const margin = 10;
+    const logoWidth = 50;
+    const logoHeight = logoWidth * redKnotImage.height / redKnotImage.width;
+    const logoY = margin;
 
     const addHeader = () => {
       doc.setFontSize(8);
-      doc.addImage('/easel.png', 'PNG', margin, 0, 50, 35);
+      doc.addImage('/red-knot.png', 'PNG', margin, logoY, logoWidth, logoHeight);
 
-      const headerTextY = 10;
-      const headerTextX =
-        pageWidth -
-        (doc.getTextWidth(InvoiceConstants.HeaderIcons.location.text.split('\n')[0]) + 20);
+      const headerTextX = pageWidth - margin;
+      const headerTextWidth = headerTextX - (margin + logoWidth + 8);
+      const headerLines = [
+        ...InvoiceConstants.HeaderIcons.phone.text.split('\n'),
+        ...doc.splitTextToSize(InvoiceConstants.HeaderIcons.location.text, headerTextWidth),
+        ...InvoiceConstants.HeaderIcons.globe.text.split('\n'),
+      ];
+      const headerLineSpacing = 4;
+      const headerTextY =
+        logoY +
+        (logoHeight - (headerLines.length - 1) * headerLineSpacing) / 2 +
+        2.5;
 
-      doc.text(InvoiceConstants.HeaderIcons.phone.text, headerTextX, headerTextY);
-      doc.text(InvoiceConstants.HeaderIcons.location.text, headerTextX, headerTextY + 10);
-      doc.text(InvoiceConstants.HeaderIcons.globe.text, headerTextX, headerTextY + 20);
+      headerLines.forEach((line, index) => {
+        doc.text(line, headerTextX, headerTextY + index * headerLineSpacing, {
+          align: 'right',
+        });
+      });
     };
 
-    let yOffset = 0;
+    let yOffset = margin + logoHeight;
     addHeader();
-    yOffset += 35;
 
     doc.setFontSize(10);
     const leftColumnX = margin;
@@ -369,7 +385,7 @@ const EaselInvoiceMaker = () => {
     if (yOffset + 30 > pageHeight) {
       doc.addPage();
       addHeader();
-      yOffset = margin + 35;
+      yOffset = margin + logoHeight;
     }
     yOffset += 20;
     doc.text(`Reference: ${formData.reference}`, leftColumnX, yOffset);
@@ -387,7 +403,7 @@ const EaselInvoiceMaker = () => {
     if (yOffset + 30 > pageHeight) {
       doc.addPage();
       addHeader();
-      yOffset = margin + 35;
+      yOffset = margin + logoHeight;
     }
 
     autoTable(doc, {
@@ -418,7 +434,7 @@ const EaselInvoiceMaker = () => {
     if (yOffset + 20 > pageHeight) {
       doc.addPage();
       addHeader();
-      yOffset = margin + 35;
+      yOffset = margin + logoHeight;
     }
     doc.text(`${formData.InvoiceOrQuotation}`, pageWidth / 2, yOffset, null, null, 'center');
     yOffset += 15;
@@ -497,7 +513,7 @@ const EaselInvoiceMaker = () => {
     if (yOffset + 20 > pageHeight) {
       doc.addPage();
       addHeader();
-      yOffset = margin + 35;
+      yOffset = margin + logoHeight;
     }
 
     autoTable(doc, {
@@ -512,7 +528,7 @@ const EaselInvoiceMaker = () => {
         halign: 'center',
       },
       headStyles: {
-        fillColor: [100, 163, 79],
+        fillColor: [117, 22, 36],
         textColor: [255, 255, 255],
         fontStyle: 'bold',
         halign: 'center',
@@ -542,7 +558,7 @@ const EaselInvoiceMaker = () => {
     if (yOffset + 10 > pageHeight) {
       doc.addPage();
       addHeader();
-      yOffset = margin + 35;
+      yOffset = margin + logoHeight;
     }
     const amountInWordsText = `Amount in Words: ${formData.amountInWords}`;
     const textWidth = doc.getTextWidth(amountInWordsText);
@@ -554,7 +570,7 @@ const EaselInvoiceMaker = () => {
     if (yOffset + 70 > pageHeight) {
       doc.addPage();
       addHeader();
-      yOffset = margin + 35;
+      yOffset = margin + logoHeight;
     }
 
     doc.text('Notes:', margin, yOffset);
@@ -568,7 +584,7 @@ const EaselInvoiceMaker = () => {
 
     const barHeight = 10;
     const yPosition = pageHeight - barHeight;
-    doc.setFillColor(100, 163, 79);
+    doc.setFillColor(117, 22, 36);
     doc.rect(0, yPosition, pageWidth, barHeight, 'F');
 
     doc.setFontSize(10);
@@ -713,7 +729,12 @@ const EaselInvoiceMaker = () => {
       <SubContainer>
         <HeaderSection>
           <LogoContainer>
-            {/* <Image src="/easel.png" alt="Easel Outdoor logo" width={200} height={180} /> */}
+            <Image
+              src={redKnotImage}
+              alt="Easel Outdoor logo"
+              width={redKnotImage.width}
+              height={redKnotImage.height}
+            />
           </LogoContainer>
           <ConstantsContainer>
             {InvoiceConstants.HeaderIcons.phone.text

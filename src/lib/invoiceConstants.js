@@ -13,7 +13,7 @@ export const InvoiceConstants = {
       text: 'Tri-angle (Humak) Industrial Area, kahuta / Kashmir Exit Islamabad, Express Highway Islamabad.',
     },
     globe: {
-      text: 'www.easeloutdoor.com\nwww.easeloutdoor.com/our-services',
+      text: 'www.redknot.com\nredknot.com/our-services',
     },
   },
   BelowHeader: {
